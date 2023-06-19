@@ -1,7 +1,13 @@
 {
   "name": "Charging Power Indicator",
   "description": "Displays the current charging power of a laptop on the status bar.",
-  "shell-version": ["3.36", "3.38", "40"],
+  "shell-version": [
+      "40",
+      "41",
+      "42",
+      "43",
+      "44"
+    ],
   "uuid": "charging-power-indicator@marcsekz",
   "url": "https://github.com/marcsekz/gnome-charging-power-indicator.git",
   "version": 1
