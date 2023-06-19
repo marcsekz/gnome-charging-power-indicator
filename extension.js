@@ -7,6 +7,8 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
 
+let active;
+
 var ChargingPowerIndicator = GObject.registerClass(
     class ChargingPowerIndicator extends PanelMenu.Button {
         _init() {
@@ -24,6 +26,8 @@ var ChargingPowerIndicator = GObject.registerClass(
                 y_align: Clutter.ActorAlign.CENTER
             });
             this.actor.add_child(this._powerLabel);
+            this.actor.reactive = false;
+            active = true;
 
             // this._updatePower();
 
@@ -37,6 +41,11 @@ var ChargingPowerIndicator = GObject.registerClass(
 
             if (contents1.toString().trim() == "Charging")
             {
+                if (!active)
+                {
+                    this.actor.show();
+                    active = true;
+                }
                 let file = Gio.File.new_for_path('/sys/class/power_supply/BAT0/power_now');
                 let [, contents] = file.load_contents(null);
 
@@ -47,6 +56,11 @@ var ChargingPowerIndicator = GObject.registerClass(
             {
                 // this._powerLabel.set_text(contents1.toString());
                 this._powerLabel.set_text('');
+                if (active)
+                {
+                    this.actor.hide();
+                    active = false;
+                }
             }
 
             // this._powerLabel.set_text("Helllo")
