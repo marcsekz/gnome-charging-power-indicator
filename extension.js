@@ -1,11 +1,11 @@
-const St = imports.gi.St;
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const Lang = imports.lang;
-const Clutter = imports.gi.Clutter;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const GObject = imports.gi.GObject;
+import St from 'gi://St';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+// import * as Lang from 'resource:///org/gnome/shell/lang.js'
+import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
 
 let active;
 
@@ -18,15 +18,15 @@ var ChargingPowerIndicator = GObject.registerClass(
                 icon_name: 'battery-full-charged-symbolic',
                 style_class: 'system-status-icon'
             });
-            // this.actor.add_child(this._icon);
+            // this.add_child(this._icon);
 
             this._powerLabel = new St.Label({
                 text: '0W',
                 // y_expand: true,
                 y_align: Clutter.ActorAlign.CENTER
             });
-            this.actor.add_child(this._powerLabel);
-            this.actor.reactive = false;
+            this.add_child(this._powerLabel);
+            this.reactive = false;
             active = true;
 
             // this._updatePower();
@@ -39,17 +39,18 @@ var ChargingPowerIndicator = GObject.registerClass(
             let file1 = Gio.File.new_for_path('/sys/class/power_supply/BAT0/status');
             let [, contents1] = file1.load_contents(null);
 
-            if (contents1.toString().trim() == "Charging")
+            let decoder = new TextDecoder('utf-8');
+            if (decoder.decode(contents1).trim() == "Charging")
             {
                 if (!active)
                 {
-                    this.actor.show();
+                    this.show();
                     active = true;
                 }
                 let file = Gio.File.new_for_path('/sys/class/power_supply/BAT0/power_now');
                 let [, contents] = file.load_contents(null);
 
-                let power = parseFloat(contents.toString().trim()) / 1000000; // Convert to Watts
+                let power = parseFloat(decoder.decode(contents).trim()) / 1000000; // Convert to Watts
                 this._powerLabel.set_text(power.toFixed(2) + 'W');
             }
             else
@@ -58,7 +59,7 @@ var ChargingPowerIndicator = GObject.registerClass(
                 this._powerLabel.set_text('');
                 if (active)
                 {
-                    this.actor.hide();
+                    this.hide();
                     active = false;
                 }
             }
@@ -89,10 +90,20 @@ function update() {
 function enable() {
     chargingPowerIndicator = new ChargingPowerIndicator();
     Main.panel.addToStatusArea('charging-power-indicator', chargingPowerIndicator);
-    timeout=GLib.timeout_add(GLib.PRIORITY_DEFAULT_IDLE, 1000, update);
+    let timeout=GLib.timeout_add(GLib.PRIORITY_DEFAULT_IDLE, 1000, update);
 }
 
 function disable() {
     chargingPowerIndicator.destroy();
     chargingPowerIndicator = null;
+}
+
+export default class charging_power_indicator {
+    enable() {
+        enable()
+    }
+
+    disable() {
+        disable()
+    }
 }
